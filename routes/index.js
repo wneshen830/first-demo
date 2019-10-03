@@ -45,6 +45,8 @@ router.post("/deletestocks/:stock_id", function(req, res) {
 });
 
 router.get("/stocks/:stock_id", function(req, res, next) {
+
+
   console.log("編輯!");
   db.query("SELECT * FROM stock WHERE stock_id =$1", [
     req.params.stock_id
@@ -63,13 +65,12 @@ router.get("/stocks/:stock_id", function(req, res, next) {
 router.post("/updatestocks/:stock_id", function(req, res, next) {
   console.log(req.params);
   console.log(req.body);
-  db.query("UPDATE stock SET name = $1, quantity = $2 WHERE stock_id = $3 ", [
-    req.body.name,
-    req.body.quantity,
-    req.params.stock_id
-  ]).then(function() {
+  
+  db.query("UPDATE stock SET name = $1, quantity = $2 WHERE stock_id = $3 ", [req.body.name,req.body.quantity,req.params.stock_id])
+  .then(function() {
     res.redirect("/stocks");
   });
+
 });
 
 module.exports = router;
