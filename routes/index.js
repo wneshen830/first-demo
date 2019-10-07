@@ -21,18 +21,33 @@ router.post("/add-stock", function(req, res) {
 });
 
 router.get("/stocks", (req, res, next) => {
-  db.multi("SELECT * FROM stock")
+  
+  if (req.query.searchstocks !== "" && req.query.searchstocks !== null  && req.query.searchstocks !== undefined) {//logic
+    console.log("if")
+    console.log(req.query.searchstocks)
+    let query = req.query.pick === "Name"? 'select * from stock where name = $1': 'select * from stock where quantity = $1'
+    db.query(query, [req.query.searchstocks])
     .then(data => {
-      var stocks = data[0];
+      var stocks = data;
       console.log("stock:", stocks);
-      req.stocks = stocks;
+      res.render("index", { stocks: stocks });
     })
-    .then(() => {
-      res.render("index", { stocks: req.stocks });
+    .catch(error => {
+      console.log("ERROR:", error);
+    })
+  } 
+  else { //origin
+    console.log("else")
+    db.query("SELECT * FROM stock")
+    .then(data => {
+      var stocks = data;
+      console.log("stock:", stocks);
+      res.render("index", { stocks: stocks });
     })
     .catch(error => {
       console.log("ERROR:", error);
     });
+  }
 });
 
 router.post("/deletestocks/:stock_id", function(req, res) {
@@ -45,12 +60,9 @@ router.post("/deletestocks/:stock_id", function(req, res) {
 });
 
 router.get("/stocks/:stock_id", function(req, res, next) {
-
-
   console.log("編輯!");
-  db.query("SELECT * FROM stock WHERE stock_id =$1", [
-    req.params.stock_id
-  ]).then(function(data) {
+  db.query("SELECT * FROM stock WHERE stock_id =$1", [req.params.stock_id])
+  .then(function(data) {
     console.log("查詢成功!");
     console.log(data);
     res.render("edit", {
@@ -72,5 +84,13 @@ router.post("/updatestocks/:stock_id", function(req, res, next) {
   });
 
 });
+
+router.get("/stock/:stock_id",function(req, res, next){
+console.log(router.get);
+db.query('select * from stock where name = $1 or quantity = $2',[req.body.name, req.body.quantity])
+.then(() => {
+  res.render("/stock", { stocks: req.stocks });
+})
+  })
 
 module.exports = router;
